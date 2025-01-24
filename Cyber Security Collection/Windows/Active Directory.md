@@ -14,7 +14,7 @@
 
 [OverPass The Hash-Pass The Key](Active%20Directory/OverPass%20The%20Hash-Pass%20The%20Key.md)
 
-[Kerberoasting (в т.ч. без пароля)](Active%20Directory/Kerberoasting%20(в%20т.ч.%20без%20пароля%20пользователя).md)
+[Kerberoasting (в т.ч. без пароля пользователя)](Active%20Directory/Kerberoasting%20(в%20т.ч.%20без%20пароля%20пользователя).md)
 
 [Pass The Ticket](Active%20Directory/Pass%20The%20Ticket.md)
 
