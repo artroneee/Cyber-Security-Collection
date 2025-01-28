@@ -94,7 +94,7 @@ dst.ip = 10.126.11.174
 
 *Укажите FQDN рабочей станции, на которой пользователь открыл файл.*
 
-Нам известно, что субъектом был пользователь с логином d_jensen `subject.account.name = "d_jensen"` и что он открыл какой-то неизвестный файл `object = "file" and action = "file"`
+Нам известно, что субъектом был пользователь с логином d_jensen `subject.account.name = "d_jensen"` и что он открыл какой-то неизвестный файл `object = "file" and action = "open"`
 В итоге, получим фильтр:
 `subject.account.name = "d_jensen" and object = "file" and action = "open"`
 ![](../../Attachments/sScreenshot_11.png)
