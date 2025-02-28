@@ -68,10 +68,15 @@ Service Ticket, выпущенный злоумышленником, можно 
 | Golden Tickets                             | krbtgt                                                                  |
 # Практика
 **Вводные:**
+
 УЗ: *st_user*
+
 Членство: *Пользователи домена (test.local/Users)*
+
 Целевая УЗ: *PC1$*
+
 NT-хэш целевой уз: *7dfce760fc8126c2bc0f55a70957fc7c*
+
 AES-256 хэш: *48928a8b4bfc4f70dea2aa7640041d8a7de044870110374dbc803a079e733eca*
 
 
