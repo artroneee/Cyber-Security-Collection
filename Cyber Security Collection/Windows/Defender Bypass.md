@@ -88,15 +88,21 @@ x86_64-w64-mingw32-g++ -static -o test.exe test.cpp
 Реализация в коде:
 
 ``` c++
-void encryptdecrypt(unsigned char* shellcode, size_t size, unsigned char key) {for (size_t i = 0; i < size; i++) {shellcode[i] ^= key;}}
+void encryptdecrypt(unsigned char* shellcode, size_t size, unsigned char key) {
+  for (size_t i = 0; i < size; i++) {
+    shellcode[i] ^= key;
+  }
+}
 ```
 
 ``` c++
-unsigned char originalShellcode[] = { 0xfc,0x48,0x83,0xe4,0xf0,0xe8,0xc0,0x00,...,0x89,0xda,0xff,0xd5 };size_t shellcodeSize = sizeof(originalShellcode);
+unsigned char originalShellcode[] = { 0xfc,0x48,0x83,0xe4,0xf0,0xe8,0xc0,0x00,...,0x89,0xda,0xff,0xd5 };
+size_t shellcodeSize = sizeof(originalShellcode);
 unsigned char key = 0x16; // Ключ для XOR-шифрования
 encryptdecrypt(originalShellcode, shellcodeSize, key);// Шифрование нагрузки
 ...// Расшифрование нагрузки перед выполнением
-encryptdecrypt(static_cast<unsigned char>(execMemory), shellcodeSize, key);
+encryptdecrypt(static_cast<unsigned char>(execMemory),
+shellcodeSize, key);
 ```
 
 _Здесь видно, что XOR не справился со своей задачей._
@@ -233,7 +239,17 @@ int main() {
   }
     std::cout << "\n\n";
     std::cout << "XOR DECRYPT: ";
-encryptdecrypt(aesshellcode, shellcodesize, xorkey, keysize);for (int i = 0; i < shellcodesize; i++) {std::cout <<  std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(aesshellcode[i]);if (i < shellcodesize - 1) {std::cout << ", ";}}unsigned char decaesshelcode = aes.DecryptECB(aesshellcode, shellcodesize, aeskey);std::cout << "\n\n";std::cout << "XOR + AES DECRYPT: ";aes.printHexArray(decaesshelcode, shellcodesize);}
+encryptdecrypt(aesshellcode, shellcodesize, xorkey, keysize);
+for (int i = 0; i < shellcodesize; i++) {
+  std::cout <<  std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(aesshellcode[i]);
+  if (i < shellcodesize - 1) {
+    std::cout << ", ";
+  }
+}
+unsigned char decaesshelcode = aes.DecryptECB(aesshellcode, shellcodesize, aeskey);
+std::cout << "\n\n";
+std::cout << "XOR + AES DECRYPT: ";
+aes.printHexArray(decaesshelcode, shellcodesize);}
 ```
 
 Результат работы скрипта:
