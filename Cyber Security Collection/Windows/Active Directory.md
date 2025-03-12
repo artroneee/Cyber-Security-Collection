@@ -32,4 +32,4 @@
 
 [EternalBlue](Active%20Directory/EternalBlue.md)
 
-[Diamond & Sapphire Tickets](Active%20Directory/Diamond%20&%20Sapphire%20Tickets.md)
+[Diamond & Sapphire Tickets](Active%20Directory/Diamond%20%26%20Sapphire%20Tickets.md)
