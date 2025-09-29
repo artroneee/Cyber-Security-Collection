@@ -238,3 +238,36 @@ dst.ip = 10.126.11.174
 ![](../../Attachments/sScreenshot_30.png)
 
 Самый популярный хост является правильным ответом - comp-5117.city.stf
+
+Небезопасное хранение данных / Задание 7.1
+Укажите имя рабочей станции эйчара, на которой хранится файл с паролем.
+
+Из предыстории нам известно, что злоумышленнику удалось повысить привилегии от имени УЗ HR'a, воспользовавшись паролем администратора b_rivers_admin. 
+Составим фильтр, где УЗ-объектом будет УЗ админа и действием повышение привилегий:
+object.account.name = "b_rivers_admin" and action = "elevate"
+Получили пачку событий 4648 с хоста comp-2159.hv-logistics.stf, где процесс-субъект входа имеет следующий путь: с:\users\d_jensen\documents\runascs_net2.exe
+Ответ: comp-2159.hv-logistics.stf
+
+Небезопасное хранение данных / Задание 7.2
+Приведите пароль учетной записи b_rivers_admin.
+
+Нам уже известен хост, процесс, имя УЗ-субъекта/объекта. Но как найти пароль? Прежде всего, необходимо разобраться что за тулзу (https://github.com/antonioCoco/RunasCs) использует злоумышленник. Видно, что этот инструмент представляет собой улучшенную версию утилиты runas.exe, которая устраняет некоторые ограничения, самое главное из которых- это использование пароля в команде. 
+Осталось выполнить поиск по командной строке, использовав всю найденную информацию:
+event_src.host = "comp-2159.hv-logistics.stf" and object.name = "runascs_net2.exe" and subject.account.name = "d_jensen" and object.process.cmdline contains "b_rivers_admin"
+В результате, получаем событие с командной строкой: RunasCs_net2.exe  B_Rivers_admin -p zY2oWqz2qn3Ne71W "whoami" -d hv-logistics.stf
+Ответ: zY2oWqz2qn3Ne71W
+
+Небезопасное хранение данных / Задание 7.3
+Укажите имя файла из фишинговой рассылки, открытие которого привело к развитию атаки.
+
+Вводной информации о письме и его содержании у нас нет, поэтому необходимо рассуждать логически.
+У нас есть хост, имя УЗ и факт запуска какого-то файла, в последствии которого атака начала своё развитие.
+Обычно, при фишинге используются документы .doc/.docx или таблицы .xls/.xlsx/.xlsm с макросами, поэтому нужно поискать их (период времени лучше расширить на сутки до):
+event_src.host = "comp-2159.hv-logistics.stf" and (object.process.cmdline contains ".doc" or object.process.cmdline contains ".xls") and action = "start" and subject.account.name = "d_jensen"
+Получили множество событий с документами из папки C:\\Attachments, которые открываются двумя способами:  winword.exe и cmd /c start. Теперь, когда мы знаем путь и то, что при запуске этого документа, что-то происходит (является родительской командной строкой, которая вызывает ту или иную активность в результате работы макроса), произведем поиск по object.process.parent.cmdline:
+event_src.host = "comp-2159.hv-logistics.stf" and object.process.parent.cmdline contains "C:\Attachments" and (object.process.parent.cmdline contains ".doc" or object.process.parent.cmdline contains ".xls") and action = "start" and subject.account.name = "d_jensen"
+Сделаем сортировку по object.process.cmdline и отметем события, в которых командная строка содержит такую же команду с запуском файла (все команды с winword.exe и .doc/.docx документами) 
+event_src.host = "comp-2159.hv-logistics.stf" and object.process.parent.cmdline contains "C:\Attachments" and object.process.parent.cmdline not contains ".doc" and object.process.parent.cmdline not contains "winword.exe" and action = "start" and subject.account.name = "d_jensen"
+Получили 4  события с разными .xls файлами. Убираем хэш (32 символа) и получаем чистое название файла. После подбора, получаем правильный ответ.
+Ответ: book_withcob.xls
+
