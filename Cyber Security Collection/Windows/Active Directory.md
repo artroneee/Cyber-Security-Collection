@@ -26,6 +26,8 @@
 
 [Silver Ticket](Active%20Directory/Silver%20Ticket.md)
 
+[SSPI. Custom SSP](Active%20Directory/SSPI.%20Custom%20SSP.md)
+
 [Domain Dump](Active%20Directory/Domain%20Dump.md)
 
 [Dump GPP passwords](Active%20Directory/Dump%20GPP%20passwords.md)
