@@ -31,3 +31,5 @@
 [DLL Hollowing](Windows/DLL%20Hollowing.md)
 
 [Defender Bypass](Windows/Defender%20Bypass.md)
+
+[Com Hijacking](Windows/COM%20Hijacking.md)
