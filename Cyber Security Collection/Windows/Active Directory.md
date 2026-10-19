@@ -35,3 +35,5 @@
 [EternalBlue](Active%20Directory/EternalBlue.md)
 
 [Diamond & Sapphire Tickets](Active%20Directory/Diamond%20%26%20Sapphire%20Tickets.md)
+
+[WEC + WinRM privesc Research](Active%20Directory/WEC%20+%20WinRM%20privesc%20Research.md)
