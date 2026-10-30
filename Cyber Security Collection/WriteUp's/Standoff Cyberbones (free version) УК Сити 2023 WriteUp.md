@@ -18,7 +18,7 @@
 event_src.host = 'tsantos.uf.city.stf' and msgid in [1, 4688] and (object.process.cmdline contains '.doc' or object.process.cmdline contains '.xls')
 ```
 
-![](../../../Attachments/figure-01.jpg)
+![](../../Attachments/figure-01.jpg)
 
 *Рисунок 1 — Поиск открытия документов через события создания процессов*
 
